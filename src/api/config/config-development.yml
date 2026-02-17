@@ -1,0 +1,26 @@
+server :
+  port : 5005 #gin listen to this port #http server port
+  runMode : debug #loggs all the request and detailed errors thats one of gin mode
+logger:
+  filePath: ../logs/logs.log #loggs are saved here
+  Encoding: json
+  level: debug
+  output: file
+cores: #which frontends can call your backend from browsers Cross-Origin Resource Sharing
+   allowOrigins: "*" #allow all origins and browser permission
+   #all are used locally 
+postgres: #persistant data
+ host: localhost
+ port: 5432
+ user: postgres
+ password : admin
+ dbname : book_store_db
+ sslmode: false
+redis: #fast in memory data with key value
+ host: localhost
+ port: 6379
+ password: password
+ db: 0
+ minidleconnections: 100
+ poolsize: 5000 #Max number of Redis connections large pool size for testing
+ pooltimeout: 240 #How long to wait for a free connection
