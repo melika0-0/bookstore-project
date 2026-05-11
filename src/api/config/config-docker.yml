@@ -15,12 +15,19 @@ postgres: #persistant data
  user: postgres
  password : admin
  dbname : book_store_db
- sslmode: false
+ sslmode: disable
+ maxidleconnections : 15
+ maxopenconnections : 100
+ connmaxtimeout : 5
 redis: #fast in memory data with key value
- host: redis_container
+ host: redis_container #internal networkname
  port: 6379
  password: password
- db: 0
- minidleconnections: 100
+ db: 0 #put the cash in room 0 (it has 16)
+ dialTimeout: 5
+ readTimeout: 5
+ writeTimeout: 5
+ minidleconnections: 100 #even if we had zero active users
+ Idlecheckfrequency : 
  poolsize: 5000 #Max number of Redis connections large pool size for testing
  pooltimeout: 240 #How long to wait for a free connection

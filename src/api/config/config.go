@@ -4,9 +4,12 @@ import (
 	"errors"
 	"log"
 	"os"
-
+"time"
 	"github.com/spf13/viper"
 )
+type CorsConfig struct {
+	AllowedOrigin string
+}
 
 type Config struct {
 	Server   ServerConfig
@@ -25,7 +28,10 @@ type PostgresConfig struct {
 	User     string
 	Password string
 	DbName   string
-	SSLMode  bool
+	SSLMode string //disable ssl for local development
+	Maxidleconnections int
+	Maxopenconnections int
+	Connmaxtimeout time.Duration
 }
 type RedisConfig struct {
 	Host               string
@@ -37,6 +43,10 @@ type RedisConfig struct {
 	minidleconnections int
 	poolsize           int
 	pooltimeout        int
+	dialTimeout time.Duration
+    readTimeout  time.Duration
+    writeTimeout time.Duration
+	Idlecheckfrequency time.Duration
 }
 func GetConfig() *Config{
 	cfgPath := GetConfigPath(os.Getenv("APP_ENV"))

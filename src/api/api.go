@@ -1,12 +1,16 @@
 package api
 
 import (
-	"bookstore-project/api/config"
-	"bookstore-project/api/routers"
-	"fmt"
-
+	"github.com/melika0-0/bookstore-project/api/config"
+	"github.com/melika0-0/bookstore-project/api/middlewares"
+	"github.com/melika0-0/bookstore-project/api/routers"
+ "github.com/melika0-0/bookstore-project/api/validation"
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
+	"fmt"
+	
+
 )
 
 func InitServer() {
@@ -16,8 +20,11 @@ func InitServer() {
 	val,ok := binding.Validator.Engine().(*validator.Validate)
 	if ok {
 		val.RegisterValidation("mobile",validation.IrnMobileNumberValidator, true)
+		val.RegisterValidation("password",validation.PasswordValidator, true)
 	}
-	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(middlewares.Corse.(cfg))
+	
+	r.Use(gin.LoggerWithDefaultWriter(), gin.Recovery())
 	//for logging user and recover 500 if there's a panic global middleware
 	r.RedirectTrailingSlash = false
     api := r.Group("/api")

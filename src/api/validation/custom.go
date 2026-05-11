@@ -1,18 +1,26 @@
 package validation
 
-import "github.com/go-playground/validator/v10"
+import ("github.com/go-playground/validator/v10")
+type ValidationError struct {
+property string `json:"property"` //what we wanna validate
+message string `json:"message"`
+tag string `json:"tag"`
+value any `json:"value"`
+}
 
+func GetValidationErrors(err error) *[]ValidationError{
+	var validationErrors []ValidationError
+	var ver Validator.ValidationErrors
+	if errors.As(err, &ver) {
+		for_, err := range err.(validator.ValidationErrors) {
+			var el ValidationError
+			el.property = err.field()
+			el.tag = err.tag()
+			el.value = err.Param()
+			validationErrors = append(validationErrors, el) //append the errors
 
-func IrnMobileNumberValidator(fld validator.FieldLevel)bool {
-	value,ok := fil.Field().Interface().(string) 
-	if != ok {
-		return false
+		}
+		return &validationErrors //pointer to the slice
 	}
-res , err := regexp.MatchString(`^(09\d{9}|\+989\d{9})$`, value)
-if err != nil {
-	log.Print(err.Error())
+	return nil //no validation errors
 }
-return res
-
-}
-

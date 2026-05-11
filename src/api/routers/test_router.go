@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"bookstore-project/api/handlers"
+	"github.com/melika0-0/bookstore-project/api/handlers"
 
 	"github.com/gin-gonic/gin"
 )
