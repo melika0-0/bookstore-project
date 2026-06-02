@@ -11,7 +11,6 @@ import (
 func main(){
 	cfg := config.GetConfig()
 	err := cache.InitRedis(cfg)
-	defer cache.CloseRedis()
 	if err != nil {
 		panic(err)
 	}
