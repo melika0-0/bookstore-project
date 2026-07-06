@@ -2,29 +2,28 @@ package handlers
 
 import (
 	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
-type header struct{
-	UserId string 
-	Browser string
-}
-//bodyyy
-type personDate struct {
-	firstname string `json :"first_name" , binding: "required,max=10` //using tags for validation
-	lastname string 
-	MobileNumber string
-
+type Header struct {
+	UserID  string `header:"UserId"`
+	Browser string `header:"Browser"`
 }
 
-type TestHandler struct{
+// DTO (request body)
+type PersonData struct {
+	FirstName    string `json:"first_name" binding:"required,max=10"`
+	LastName     string `json:"last_name"`
+	MobileNumber string `json:"mobile_number"`
 }
+
+type TestHandler struct{}
 
 func NewTestHandler() *TestHandler {
 	return &TestHandler{}
 }
 
-//send json responnse back to client
 func (h *TestHandler) Test(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"result": "Test",
@@ -33,54 +32,65 @@ func (h *TestHandler) Test(c *gin.Context) {
 
 func (h *TestHandler) AddUser(c *gin.Context) {
 	id := c.Param("id")
+
 	c.JSON(http.StatusOK, gin.H{
 		"result": "AddUser",
-		"id": id,
+		"id":     id,
 	})
 }
-// trying to find userid through header
-func (h *TestHandler) HeaderBinder1(c *gin.Context){
-	Userid := c.GetHeader("UserId")
+
+// header manually
+func (h *TestHandler) HeaderBinder1(c *gin.Context) {
+	userID := c.GetHeader("UserId")
+
 	c.JSON(http.StatusOK, gin.H{
-		"result": "Headerbinder1",
-		"id": Userid,
+		"result": "HeaderBinder1",
+		"id":     userID,
 	})
-
 }
 
-func (h *TestHandler) HeaderBinder2(c *gin.Context){
-	header := header{}
-     c.BindHeader(&header) //bind in obj //dont need error
+// header bind into struct (DTO-style)
+func (h *TestHandler) HeaderBinder2(c *gin.Context) {
+	var header Header
+
+	if err := c.ShouldBindHeader(&header); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
 	c.JSON(http.StatusOK, gin.H{
-		"result": "Headerbinder2",
-		"header" : header,
+		"result": "HeaderBinder2",
+		"header": header,
 	})
-
 }
 
-func (h *TestHandler) UriBinder(c *gin.Context){
+// URI params
+func (h *TestHandler) UriBinder(c *gin.Context) {
 	id := c.Param("id")
 	name := c.Param("name")
+
 	c.JSON(http.StatusOK, gin.H{
 		"result": "UriBinder",
-		"id" : id,
-		"name" : name ,
+		"id":     id,
+		"name":   name,
 	})
-
 }
 
-func (h *TestHandler) BodyBinder(c *gin.Context){
-	p := personDate{}
-	err := c.ShouldBindJSON(&p)
-	if err != nil{
+// JSON body binding (DTO usage)
+func (h *TestHandler) BodyBinder(c *gin.Context) {
+	var p PersonData
+
+	if err := c.ShouldBindJSON(&p); err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
 			"validationError": err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"result": "BodyBinder", 
-		"person" : p,
-	})
 
+	c.JSON(http.StatusOK, gin.H{
+		"result": "BodyBinder",
+		"person": p,
+	})
 }

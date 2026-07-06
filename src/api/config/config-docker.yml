@@ -10,9 +10,11 @@ cores: #which frontends can call your backend from browsers Cross-Origin Resourc
    allowOrigins: "*" #allow all origins and browser permission
    #all are used locally 
 postgres: #persistant data
- host: postgres_container
- port: 5432
- user: postgres
+ host: localhost
+ 
+ ports:
+  - "5432:5432"
+  - "6379:6379"
  password : admin
  dbname : book_store_db
  sslmode: disable

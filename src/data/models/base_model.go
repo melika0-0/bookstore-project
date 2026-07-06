@@ -1,6 +1,11 @@
 package models
 
-import 
+import(
+	"time"
+	"gorm.io/gorm"
+	"database/sql"
+	
+)
 
 //for all the models 
 type BaseModel struct {
@@ -17,7 +22,7 @@ type BaseModel struct {
 	DeletedBy sql.NullInt64 `gorm:"null" json:"deleted_by"`
 }
 
-func (b *BaseModel) BeforeCreate(tx *gorm.DB) (err error) {
+func (m *BaseModel) BeforeCreate(tx *gorm.DB) (err error) {
 	Value := tx.Statement.Context.Value("UserId")
 	var userId = -1
 	if Value != nil {
@@ -31,7 +36,7 @@ func (b *BaseModel) BeforeCreate(tx *gorm.DB) (err error) {
 
 }
 
-func (b *BaseModel) BeforeUpdate(tx *gorm.DB) (err error) {
+func (m *BaseModel) BeforeUpdate(tx *gorm.DB) (err error) {
 	Value := tx.Statement.Context.Value("UserId")
 	var userId = -1
 	if Value != nil {
@@ -39,12 +44,12 @@ func (b *BaseModel) BeforeUpdate(tx *gorm.DB) (err error) {
 	}
 	
 	 m.ModifiedAt = sql.NullTime{Time: time.Now().UTC(), Valid: true}
-	m.ModifiedBy = userId
+	m.ModifiedBy = sql.NullInt64{Int64: int64(userId), Valid: true}
 	return
 
 }
 
-func (b *BaseModel) BeforeDelete(tx *gorm.DB) (err error) {
+func (m *BaseModel) BeforeDelete(tx *gorm.DB) (err error) {
 	Value := tx.Statement.Context.Value("UserId")
 	var userId = -1
 	if Value != nil {
@@ -52,7 +57,7 @@ func (b *BaseModel) BeforeDelete(tx *gorm.DB) (err error) {
 	}
 	
 	 m.DeletedAt = sql.NullTime{Time: time.Now().UTC(), Valid: true}
-	m.DeletedBy = userId
+	m.DeletedBy = sql.NullInt64{Int64: int64(userId), Valid: true}
 	return
 
 }

@@ -1,44 +1,60 @@
 package api
 
 import (
-	"github.com/melika0-0/bookstore-project/api/config"
-	"github.com/melika0-0/bookstore-project/api/middlewares"
-	"github.com/melika0-0/bookstore-project/api/routers"
- "github.com/melika0-0/bookstore-project/api/validation"
+	"fmt"
+	"log"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
-	"fmt"
-	
 
+	"github.com/melika0-0/bookstore-project/api/config"
+	"github.com/melika0-0/bookstore-project/api/middlewares"
+	"github.com/melika0-0/bookstore-project/api/routers"
+	"github.com/melika0-0/bookstore-project/api/validation"
 )
+
 
 func InitServer() {
 	cfg := config.GetConfig()
-	r := gin.New() //returns pointer for gin.Engine
-	//register new func here
-	val,ok := binding.Validator.Engine().(*validator.Validate)
-	if ok {
-		val.RegisterValidation("mobile",validation.IrnMobileNumberValidator, true)
-		val.RegisterValidation("password",validation.PasswordValidator, true)
-	}
-	r.Use(middlewares.Corse.(cfg))
-	
-	r.Use(gin.LoggerWithDefaultWriter(), gin.Recovery())
-	//for logging user and recover 500 if there's a panic global middleware
+
+	registerValidators()
+
+	r := gin.New()
+
+	// very first func in array we hand it gin context
+	r.Use(gin.Logger(), gin.Recovery())
+	r.Use(middlewares.CORS(cfg))
 	r.RedirectTrailingSlash = false
-    api := r.Group("/api")
-	v1 := api.Group("api/v1") // route group and api versioning
-	{
-		health := v1.Group("/health")
-		test_router := v1.Group("/test")
 
+	public := r.Group("/")
+	routers.AuthRouter(public)
 
-		routers.Health(health) //gets router group
-		routers.TestRouter(test_router)
+	// snapshot recovery cors and logger
+	// The snapshot keeps the groups isolated, freezing the middleware array at startup
+	protected := r.Group("/protected")
 
+	// Runs only for routes registered inside that specific group (e.g., /protected/books).
+	// for limitations auth admin check
+	protected.Use(middlewares.Auth())
+	routers.ProtectedRouter(protected)
+
+	if err := r.Run(fmt.Sprintf(":%s", cfg.Server.Port)); err != nil {
+		log.Fatal(err)
 	}
-    
-	
-	r.Run(fmt.Sprintf(":%s", cfg.Server.Port))
+}
+
+// register all custom validators used by Gin binding
+func registerValidators() {
+	v, ok := binding.Validator.Engine().(*validator.Validate)
+	if !ok {
+		log.Fatal("failed to get validator engine")
+	}
+
+	if err := v.RegisterValidation(
+		"mobile",
+		validation.IranMobileNumberValidator,
+	); err != nil {
+		log.Fatal("failed to register mobile validator:", err)
+	}
 }

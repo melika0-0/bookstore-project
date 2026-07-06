@@ -4,8 +4,9 @@ import (
 	"errors"
 	"log"
 	"os"
-"time"
+    "time"
 	"github.com/spf13/viper"
+
 )
 type CorsConfig struct {
 	AllowedOrigin string
@@ -15,6 +16,7 @@ type Config struct {
 	Server   ServerConfig
 	Postgres PostgresConfig
 	Redis    RedisConfig
+	Jwt      JwtConfig 
 }
 
 type ServerConfig struct {
@@ -23,15 +25,15 @@ type ServerConfig struct {
 }
 
 type PostgresConfig struct {
-	Host     string
-	Port     string
-	User     string
-	Password string
-	DbName   string
-	SSLMode string //disable ssl for local development
-	Maxidleconnections int
-	Maxopenconnections int
-	Connmaxtimeout time.Duration
+	Host               string `yaml:"host"`
+	Port               int    `yaml:"port"`
+	User               string `yaml:"user"`
+	Password           string `yaml:"password"`
+	DbName             string `yaml:"dbname"`
+	SSLMode            string `yaml:"sslmode"`
+	MaxIdleConnections int    `yaml:"maxidleconnections"`
+	MaxOpenConnections int    `yaml:"maxopenconnections"`
+	ConnMaxTimeout     int    `yaml:"connmaxtimeout"`
 }
 type RedisConfig struct {
 	Host               string
@@ -47,7 +49,13 @@ type RedisConfig struct {
     readTimeout  time.Duration
     writeTimeout time.Duration
 	Idlecheckfrequency time.Duration
+} 
+type JwtConfig struct {
+	Secretkey string
+	Expirationtime time.Duration
+
 }
+
 func GetConfig() *Config{
 	cfgPath := GetConfigPath(os.Getenv("APP_ENV"))
 	v,err :=LoadConfig(cfgPath,"yml")
@@ -89,7 +97,7 @@ func LoadConfig(filename string, fileType string) (*viper.Viper, error) {
 
 // get the file address
 func GetConfigPath(env string) string {
-	base := "/home/melika/projects/bookstore-project/src/api/config/"
+	base := "/home/victus/bookstore-project/src/api/config/"
 
 	switch env {
 	case "docker":

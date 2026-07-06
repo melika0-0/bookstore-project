@@ -1,26 +1,33 @@
 package validation
 
-import ("github.com/go-playground/validator/v10")
+import (
+	"errors"
+
+	"github.com/go-playground/validator/v10"
+)
+
 type ValidationError struct {
-property string `json:"property"` //what we wanna validate
-message string `json:"message"`
-tag string `json:"tag"`
-value any `json:"value"`
+	Property string `json:"property"`
+	Message  string `json:"message"`
+	Tag      string `json:"tag"`
+	Value    any    `json:"value"`
 }
 
-func GetValidationErrors(err error) *[]ValidationError{
+func GetValidationErrors(err error) *[]ValidationError {
 	var validationErrors []ValidationError
-	var ver Validator.ValidationErrors
-	if errors.As(err, &ver) {
-		for_, err := range err.(validator.ValidationErrors) {
-			var el ValidationError
-			el.property = err.field()
-			el.tag = err.tag()
-			el.value = err.Param()
-			validationErrors = append(validationErrors, el) //append the errors
 
+	var ver validator.ValidationErrors
+	if errors.As(err, &ver) {
+		for _, e := range ver {
+			var el ValidationError
+			el.Property = e.Field()
+			el.Tag = e.Tag()
+			el.Value = e.Value()
+			el.Message = e.Error()
+			validationErrors = append(validationErrors, el)
 		}
-		return &validationErrors //pointer to the slice
+		return &validationErrors
 	}
-	return nil //no validation errors
+
+	return nil
 }

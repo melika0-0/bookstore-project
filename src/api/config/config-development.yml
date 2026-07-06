@@ -1,3 +1,4 @@
+
 server :
   port : 5005 #gin listen to this port #http server port
   runMode : debug #loggs all the request and detailed errors thats one of gin mode
@@ -9,16 +10,14 @@ logger:
 cores: #which frontends can call your backend from browsers Cross-Origin Resource Sharing
    allowOrigins: "*" #allow all origins and browser permission
    #all are used locally 
-postgres: #persistant data
- host: localhost
- port: 5432
- user: postgres
- password : admin
- dbname : book_store_db
- sslmode: disable
- maxidleconnections : 15
- maxopenconnections : 100
- connmaxtimeout : 5
+postgres:
+  host: 127.0.0.1
+  port: 1989
+  user: postgres
+  password: admin
+  dbname: bookstore_db
+  sslmode: disable
+  
 redis: #fast in memory data with key value
  host: localhost
  port: 6379
@@ -31,5 +30,6 @@ redis: #fast in memory data with key value
  dialTimeout: 5
  readTimeout: 5
  writeTimeout: 5
-password :
+jwt: #jwt token 
+ Secretkey: "Secretkey"
  

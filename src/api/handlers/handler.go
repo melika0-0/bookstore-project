@@ -1,14 +1,14 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtSecret = []byte("my-secret-key")
+var jwtSecret = []byte("Secretkey")
 
 type Response struct {
 	Message string `json:"message"`
@@ -21,16 +21,17 @@ type UserRequest struct {
 	Password string `json:"password"`
 }
 
-func LoginHandler(w http.ResponseWriter, r *http.Request) {
+func LoginHandler(c *gin.Context) {
 
 	var userRequest UserRequest
-	err := json.NewDecoder(r.Body).Decode(&userRequest)
-	if err != nil {
-		http.Error(w, "Invalid request", http.StatusBadRequest)
+	if err := c.BindJSON(&userRequest); err != nil {
+		c.JSON(http.StatusBadRequest, Response{
+			Error: "Invalid request",
+		})
 		return
 	}
 
-	if userRequest.Name == "melika" && userRequest.Password == "test123" {
+	if userRequest.Name == "admin" && userRequest.Password == "password" {
 
 		claims := jwt.MapClaims{
 			"username": userRequest.Name,
@@ -41,20 +42,23 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 		signedToken, err := token.SignedString(jwtSecret)
 		if err != nil {
-			http.Error(w, " not generate", http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, Response{
+				Error: "Could not generate token",
+			})
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(Response{
-			Message: "successfull",
+		c.JSON(http.StatusOK, Response{
+			Message: "successful",
 			Token:   signedToken,
 		})
 		return
 	}
 
-	w.WriteHeader(http.StatusUnauthorized)
-	json.NewEncoder(w).Encode(Response{
+	c.JSON(http.StatusUnauthorized, Response{
 		Error: "invalid",
 	})
 }
+
+
+//we configure the rout handler 
